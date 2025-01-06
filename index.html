@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visualizar PDF</title>
-    <script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
+    <title>Editar e Salvar PDF</title>
+    <script src="lib/pdf-lib.min.js"></script> <!-- Referência local -->
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -18,62 +18,36 @@
             border: none;
             overflow: hidden;
         }
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
     </style>
 </head>
 <body>
-    <!-- Contêiner para exibir o PDF em um iframe -->
-    <div id="pdf-container">
-        <iframe id="pdf-iframe" src="https://angovr.github.io/testecompdf/formulario.pdf" frameborder="0"></iframe>
-    </div>
+    <div id="pdf-container"></div>
     <button id="save-pdf">Salvar PDF</button>
 
     <script>
         document.getElementById('save-pdf').addEventListener('click', async () => {
-            const url = document.getElementById('pdf-iframe').src;
-            const response = await fetch(url);
-            const blob = await response.blob();
+            const { PDFDocument, rgb } = PDFLib;
+            const existingPdfBytes = await fetch('path/to/your.pdf').then(res => res.arrayBuffer());
 
-            // Obter a data atual no formato "YYYY-MM-DD"
-            const today = new Date();
-            const dataAtual = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            const pdfDoc = await PDFDocument.load(existingPdfBytes);
+            const pages = pdfDoc.getPages();
+            const firstPage = pages[0];
+            const { width, height } = firstPage.getSize();
 
-            // Nome do responsável (substituir com valor dinâmico, se necessário)
-            const nomeResponsavel = 'João da Silva';
+            firstPage.drawText('Texto Editado', {
+                x: 50,
+                y: height - 50,
+                size: 12,
+                color: rgb(0, 0, 0),
+            });
 
-            // Gerar o nome do arquivo dinamicamente
-            const nomeArquivo = `Formulario_${nomeResponsavel.replace(/ /g, '_')}_${dataAtual}.pdf`;
-
+            const pdfBytes = await pdfDoc.save();
+            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
             const link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.download = nomeArquivo;
+            link.href = URL.createObjectURL(blob);
+            link.download = 'edited.pdf';
             link.click();
         });
-
-        window.onafterprint = async () => {
-            const url = document.getElementById('pdf-iframe').src;
-            const response = await fetch(url);
-            const blob = await response.blob();
-
-            // Obter a data atual no formato "YYYY-MM-DD"
-            const today = new Date();
-            const dataAtual = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-
-            // Nome do responsável (substituir com valor dinâmico, se necessário)
-            const nomeResponsavel = 'João da Silva';
-
-            // Gerar o nome do arquivo dinamicamente
-            const nomeArquivo = `Formulario_${nomeResponsavel.replace(/ /g, '_')}_${dataAtual}.pdf`;
-
-            const link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.download = nomeArquivo;
-            link.click();
-        };
     </script>
 </body>
 </html>
