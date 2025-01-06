@@ -27,7 +27,7 @@
     <script>
         document.getElementById('save-pdf').addEventListener('click', async () => {
             const { PDFDocument, rgb } = PDFLib;
-            const existingPdfBytes = await fetch('path/to/your.pdf').then(res => res.arrayBuffer());
+            const existingPdfBytes = await fetch('formulario.pdf').then(res => res.arrayBuffer());
 
             const pdfDoc = await PDFDocument.load(existingPdfBytes);
             const pages = pdfDoc.getPages();
